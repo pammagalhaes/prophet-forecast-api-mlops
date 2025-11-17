@@ -163,7 +163,7 @@ Building the Docker image
 
 Preparing deployment steps
 
-📸 Screenshot placeholder:
+## 📸 Screenshot placeholder:
 Add an image showing the “green check” workflow run in GitHub Actions.
 What should appear:
 
@@ -243,6 +243,7 @@ Deploy using Terraform or Pulumi
 Add more regressors (weather, competitors, etc.)
 
 Generate forecasts for all stores automatically
+
 
 
 
