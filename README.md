@@ -58,25 +58,14 @@ A custom train/validation split was used:
 
 ## Project Structure
 
-```plaintext
-rossmann_prophet/
-├── data/
-│   ├── raw/
-│   └── processed/
-├── models/
-│   └── prophet_store_X.joblib
-├── src/
-│   ├── api/
-│   │   └── main.py
-│   ├── modeling/
-│   │   └── model_utils.py
-│   └── config.py
-├── Dockerfile
-├── requirements.txt
-└── README.md
 
----
 ## Modeling
+
+The forecasting solution uses Prophet with additional regressors:
+
+- Promo
+- StateHoliday
+- SchoolHoliday
 
 The forecasting solution uses Prophet with additional regressors:
 
@@ -237,5 +226,6 @@ Deploy using Terraform or Pulumi
 Add more regressors (weather, competitors, etc.)
 
 Generate forecasts for all stores automatically
+
 
 
