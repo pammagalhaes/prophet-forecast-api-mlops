@@ -57,6 +57,7 @@ A custom train/validation split was used:
 ---
 
 ## Project Structure
+```plaintext
 rossmann_prophet/
 ├── data/
 │   ├── raw/
@@ -71,7 +72,8 @@ rossmann_prophet/
 │   └── config.py
 ├── Dockerfile
 ├── requirements.txt
-└── README.md
+└── README.md```
+
 
 
 ## Modeling
@@ -241,6 +243,7 @@ Deploy using Terraform or Pulumi
 Add more regressors (weather, competitors, etc.)
 
 Generate forecasts for all stores automatically
+
 
 
 
