@@ -75,20 +75,20 @@ rossmann_prophet/
 ├── requirements.txt
 └── README.md
 
-Modeling
+## Modeling
 
 The forecasting solution uses Prophet with additional regressors:
 
-Promo
+-Promo
 
-StateHoliday
+-StateHoliday
 
-SchoolHoliday
+-SchoolHoliday
 
 A separate model is trained for each store.
 Models are saved into the models/ directory as .joblib files, and the API loads the correct model dynamically based on the input store ID.
 
-API
+## API
 
 The API was built using FastAPI and exposes 2 endpoints:
 
@@ -128,7 +128,7 @@ Example Response
   ]
 }
 
-Docker & Deployment
+## Docker & Deployment
 
 This project is fully containerized using Docker.
 
@@ -144,7 +144,7 @@ The API is deployed at:
 
 ➡️ https://prophet-forecast-api-mlops.onrender.com
 
-GitHub Actions & CI/CD
+## GitHub Actions & CI/CD
 
 The project includes GitHub Actions workflows for:
 
@@ -219,7 +219,7 @@ Logs without errors
 📸 Placeholder:
 Screenshot showing the prediction output inside Swagger UI.
 
-Future Improvements
+## Future Improvements
 
 Add a web interface (Streamlit or Gradio)
 
@@ -236,3 +236,4 @@ Deploy using Terraform or Pulumi
 Add more regressors (weather, competitors, etc.)
 
 Generate forecasts for all stores automatically
+
