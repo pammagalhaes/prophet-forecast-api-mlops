@@ -73,7 +73,7 @@ rossmann_prophet/
 ├── Dockerfile
 ├── requirements.txt
 └── README.md
-
+```
 
 
 ## Modeling
@@ -243,6 +243,7 @@ Deploy using Terraform or Pulumi
 Add more regressors (weather, competitors, etc.)
 
 Generate forecasts for all stores automatically
+
 
 
 
