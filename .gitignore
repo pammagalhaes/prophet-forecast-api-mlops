@@ -3,6 +3,6 @@ __pycache__/
 .env
 .venv/
 venv/
-models/
 data/processed/
 *.log
+# Atualização para commit
