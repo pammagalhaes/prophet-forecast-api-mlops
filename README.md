@@ -75,6 +75,7 @@ rossmann_prophet/
 ├── requirements.txt
 └── README.md
 
+---
 ## Modeling
 
 The forecasting solution uses Prophet with additional regressors:
@@ -236,4 +237,5 @@ Deploy using Terraform or Pulumi
 Add more regressors (weather, competitors, etc.)
 
 Generate forecasts for all stores automatically
+
 
