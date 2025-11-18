@@ -135,11 +135,11 @@ To test the API in the browser, use the interactive docs:
 This project is fully containerized using Docker.
 
 Build locally:
-docker build -t rossmann-api .
-
+```docker build -t rossmann-api .
+````
 Run:
-docker run -p 8000:8000 rossmann-api
-
+````docker run -p 8000:8000 rossmann-api
+````
 Deployment on Render
 
 The API is deployed at:
@@ -150,76 +150,31 @@ The API is deployed at:
 
 The project includes GitHub Actions workflows for:
 
-Running unit tests (if added later)
+- Running unit tests (if added later)
 
-Validating code structure
+- Validating code structure
 
-Building the Docker image
+- Building the Docker image
 
-Preparing deployment steps
+- Preparing deployment steps
 
-## 📸 Screenshot placeholder:
-Add an image showing the “green check” workflow run in GitHub Actions.
-What should appear:
+# Screenshots
 
-Pipeline name
+## 1. Production API Execution — POST /predict
+ *Screenshot included*
 
-Status “Success”
+This screenshot shows a real test of the endpoint in the production environment (Render), including:
+- The JSON payload sent via Swagger
+- The “Execute” action
+---
 
-Timestamp
+## 2. API Response with Forecast Results
+ *Screenshot included*
 
-Usage
-Test via API Docs
-
-Open:
-
-➡️ https://prophet-forecast-api-mlops.onrender.com/docs
-
-Inside the /predict section:
-
-Click Try it out
-
-Enter input JSON
-
-Click Execute
-
-View the forecast results
-
-📸 Screenshot placeholder:
-Include a screenshot of the Swagger UI with the POST /predict executed.
-What should appear:
-
-The request JSON you sent
-
-The response JSON from the API
-
-Status code 200
-
-The models predicting without errors
-
-Screenshots
-1. Local API Running
-
-📸 Placeholder:
-Screenshot of FastAPI running locally at http://localhost:8000/docs.
-
-2. Render Deployment Panel
-
-📸 Placeholder:
-Screenshot of Render dashboard showing:
-
-Service name
-
-“Deploy succeeded”
-
-CPU and RAM usage
-
-Logs without errors
-
-3. API Prediction Example
-
-📸 Placeholder:
-Screenshot showing the prediction output inside Swagger UI.
+This screenshot shows:
+- The full prediction output returned by the Prophet model
+- HTTP status code 200
+- The API running successfully in production with no errors
 
 ## Future Improvements
 
@@ -238,6 +193,7 @@ Deploy using Terraform or Pulumi
 Add more regressors (weather, competitors, etc.)
 
 Generate forecasts for all stores automatically
+
 
 
 
