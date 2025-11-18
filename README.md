@@ -165,7 +165,7 @@ The project includes GitHub Actions workflows for:
 # Screenshots
 
 ## 1. Production API Execution — POST /predict
-  ![descrição](api_post.png)
+![descrição](post_api.png)
 
 This screenshot shows a real test of the endpoint in the production environment (Render), including:
 - The JSON payload sent via Swagger
@@ -198,6 +198,7 @@ Deploy using Terraform or Pulumi
 Add more regressors (weather, competitors, etc.)
 
 Generate forecasts for all stores automatically
+
 
 
 
