@@ -146,21 +146,31 @@ docker run -p 8000:8000 rossmann-api
 
 Deployment on Render
 
+The project is deployed automatically on Render via a Deploy Hook.
+
+Every push to the master branch triggers:
+
+- Docker image build
+
+- Push to Docker Hub
+
+- Automatic deployment to Render
+  
 The API is deployed at:
 
 ➡️ https://prophet-forecast-api-mlops.onrender.com
 
 ## GitHub Actions & CI/CD
 
-The project includes GitHub Actions workflows for:
+The project includes a GitHub Actions workflow that performs:
 
-- Running unit tests (if added later)
-
-- Validating code structure
-
+- Code checkout and validation
+  
 - Building the Docker image
-
-- Preparing deployment steps
+  
+- Pushing the image to Docker Hub (if credentials are configured)
+  
+- Automatic deployment to Render using a Deploy Hook
 
 # Screenshots
 
@@ -183,21 +193,22 @@ This screenshot shows:
 
 ## Future Improvements
 
-Add a web interface (Streamlit or Gradio)
+### **Phase 1 – Application Layer**
+- Add web interface (Streamlit/Gradio)
+- Add API authentication
 
-Add automated model retraining pipeline
+### **Phase 2 – ML Engineering**
+- Automated retraining pipeline
+- Manage models with Git LFS/DVC
+- Add new regressors
 
-Store models using Git LFS
+### **Phase 3 – MLOps & Observability**
+- Monitoring dashboard (Prometheus + Grafana)
+- Batch forecasting for all stores
 
-Add authentication (API tokens)
+### **Phase 4 – Infrastructure**
+- Deploy using Terraform or Pulumi
 
-Create monitoring dashboard (Prometheus + Grafana)
-
-Deploy using Terraform or Pulumi
-
-Add more regressors (weather, competitors, etc.)
-
-Generate forecasts for all stores automatically
 
 
 
