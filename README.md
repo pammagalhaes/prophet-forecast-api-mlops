@@ -135,11 +135,12 @@ To test the API in the browser, use the interactive docs:
 This project is fully containerized using Docker.
 
 Build locally:
-```docker build -t rossmann-api .
-````
+
+docker build -t rossmann-api
+
 Run:
-````docker run -p 8000:8000 rossmann-api
-````
+docker run -p 8000:8000 rossmann-api
+
 Deployment on Render
 
 The API is deployed at:
@@ -193,6 +194,7 @@ Deploy using Terraform or Pulumi
 Add more regressors (weather, competitors, etc.)
 
 Generate forecasts for all stores automatically
+
 
 
 
