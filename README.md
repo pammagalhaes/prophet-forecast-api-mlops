@@ -84,29 +84,24 @@ The forecasting solution uses Prophet with additional regressors:
 - StateHoliday
 - SchoolHoliday
 
-The forecasting solution uses Prophet with additional regressors:
-
--Promo
-
--StateHoliday
-
--SchoolHoliday
-
 A separate model is trained for each store.
 Models are saved into the models/ directory as .joblib files, and the API loads the correct model dynamically based on the input store ID.
 
 ## API
 
-The API was built using FastAPI and exposes 2 endpoints:
+The API was built using **FastAPI** and exposes 2 endpoints:
 
-1. GET /
+### 1. GET /
 
-Health check endpoint
-Returns:
+Health check endpoint. Returns:
 
-{"status": "ok"}
+```json
+{
+  "status": "ok"
+}
+```
 
-2. POST /predict
+### 2. POST /predict
 
 Returns future sales forecasts.
 
@@ -115,7 +110,7 @@ To test the API in the browser, use the interactive docs:
 
 ➡️ https://prophet-forecast-api-mlops.onrender.com/docs
 
-Example Request
+```Example Request
 {
   "store_id": 1,
   "periods": 7,
@@ -123,8 +118,8 @@ Example Request
   "StateHoliday": 0,
   "SchoolHoliday": 0
 }
-
-Example Response
+```
+```Example Response
 {
   "store_id": 1,
   "periods": 7,
@@ -134,7 +129,7 @@ Example Response
     ...
   ]
 }
-
+````
 ## Docker & Deployment
 
 This project is fully containerized using Docker.
@@ -243,6 +238,7 @@ Deploy using Terraform or Pulumi
 Add more regressors (weather, competitors, etc.)
 
 Generate forecasts for all stores automatically
+
 
 
 
