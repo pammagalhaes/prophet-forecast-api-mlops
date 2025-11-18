@@ -52,7 +52,9 @@ The original Rossmann dataset contains:
 A custom train/validation split was used:  
 
 - **Training until:** `2015-06-01`  
-- **Validation after:** that date  
+- **Validation after:** that date
+- 
+Validation was performed using **TimeSeriesSplit**, MAE and RMSE metrics — executed offline, during the modeling stage.
 
 ---
 
@@ -139,6 +141,7 @@ Build locally:
 docker build -t rossmann-api
 
 Run:
+
 docker run -p 8000:8000 rossmann-api
 
 Deployment on Render
@@ -194,6 +197,7 @@ Deploy using Terraform or Pulumi
 Add more regressors (weather, competitors, etc.)
 
 Generate forecasts for all stores automatically
+
 
 
 
