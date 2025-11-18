@@ -165,7 +165,7 @@ The project includes GitHub Actions workflows for:
 # Screenshots
 
 ## 1. Production API Execution — POST /predict
- (api_post.png)
+ !(api_post.png)
 
 This screenshot shows a real test of the endpoint in the production environment (Render), including:
 - The JSON payload sent via Swagger
@@ -173,7 +173,7 @@ This screenshot shows a real test of the endpoint in the production environment 
 ---
 
 ## 2. API Response with Forecast Results
- (api_render.png)
+ !(api_render.png)
 
 This screenshot shows:
 - The full prediction output returned by the Prophet model
@@ -197,6 +197,7 @@ Deploy using Terraform or Pulumi
 Add more regressors (weather, competitors, etc.)
 
 Generate forecasts for all stores automatically
+
 
 
 
