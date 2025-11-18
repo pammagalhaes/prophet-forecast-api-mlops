@@ -49,11 +49,11 @@ jobs:
           docker tag rossmann-prophet:latest ${{ secrets.DOCKERHUB_USERNAME }}/rossmann-prophet:latest
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/rossmann-prophet:latest
 
-      # Optional: Deploy to Render using Render's API (you need a RENDER_API_KEY secret)
-      # - name: Deploy to Render
-      #   if: ${{ secrets.RENDER_API_KEY != '' }}
-      #   run: |
-      #     curl -X POST https://api.render.com/deploy/srv-... \
-      #       -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
-      #       -H "Content-Type: application/json" \
-      #       -d '{"serviceId":"srv-XXXXX"}'
+      # Deploy to Render using Render's API (you need a RENDER_API_KEY secret)
+      - name: Deploy to Render
+        if: ${{ secrets.RENDER_DEPLOY_HOOK != '' }}
+        run: |
+          curl -X POST https://api.render.com/deploy/srv-... \
+            -H "Authorization: Bearer ${{ secrets.RENDER_DEPLOY_HOOK }}" \
+            -H "Content-Type: application/json" \
+            -d '{"serviceId":"srv-XXXXX"}'
