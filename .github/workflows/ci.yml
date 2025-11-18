@@ -7,14 +7,19 @@ on:
     branches: [master]
 
 jobs:
-
   build-docker:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
+      # Carrega os secrets como variáveis de ambiente
+      - name: Set env vars
+        run: |
+          echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
+          echo "RENDER_DEPLOY_HOOK=${{ secrets.RENDER_DEPLOY_HOOK }}" >> $GITHUB_ENV
+
       - name: Log in to DockerHub
-      if: env.DOCKERHUB_USERNAME != ''
+        if: ${{ env.DOCKERHUB_USERNAME != '' }}
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -24,13 +29,12 @@ jobs:
         run: docker build -t rossmann-prophet:latest .
 
       - name: Tag & push to DockerHub
-        if: env.DOCKERHUB_USERNAME != ''
+        if: ${{ env.DOCKERHUB_USERNAME != '' }}
         run: |
           docker tag rossmann-prophet:latest ${{ secrets.DOCKERHUB_USERNAME }}/rossmann-prophet:latest
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/rossmann-prophet:latest
 
-      # Deploy to Render
       - name: Deploy to Render
-        if: ${{ secrets.RENDER_DEPLOY_HOOK != '' }}
+        if: ${{ env.RENDER_DEPLOY_HOOK != '' }}
         run: |
           curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
