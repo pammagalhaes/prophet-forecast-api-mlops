@@ -206,8 +206,7 @@ This screenshot shows:
 - Monitoring dashboard (Prometheus + Grafana)
 - Batch forecasting for all stores
 
-### **Phase 4 – Infrastructure**
-- Deploy using Terraform or Pulumi
+
 
 
 
