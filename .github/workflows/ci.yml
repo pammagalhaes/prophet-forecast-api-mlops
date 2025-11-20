@@ -7,12 +7,40 @@ on:
     branches: [master]
 
 jobs:
+  # =====================================
+  # 1) Testes Unitários
+  # =====================================
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      - name: Run tests
+        run: pytest -q
+
+
+  # =====================================
+  # 2) Build + Push Docker + Deploy
+  # =====================================        
   build-docker:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      # Carrega os secrets como variáveis de ambiente
+      # Load secrets
       - name: Set env vars
         run: |
           echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
