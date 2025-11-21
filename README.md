@@ -60,21 +60,51 @@ Validation was performed using **TimeSeriesSplit**, MAE and RMSE metrics — exe
 
 ## Project Structure
 ```plaintext
-rossmann_prophet/
-├── data/
-│   ├── raw/
-│   └── processed/
-├── models/
-│   └── prophet_store_X.joblib
-├── src/
-│   ├── api/
-│   │   └── main.py
-│   ├── modeling/
-│   │   └── model_utils.py
-│   └── config.py
+prophet-forecast-api-mlops/
 ├── Dockerfile
+├── docker-compose.yml
 ├── requirements.txt
-└── README.md
+├── README.md
+│
+├── data/
+│   └── raw/
+│       ├── store.csv
+│       ├── test.csv
+│       └── train.csv
+│
+├── models/
+│   ├── prophet_store_1.joblib
+│   ├── prophet_store_2.joblib.....
+│
+├── src/
+│   ├── config.py
+│   │
+│   ├── api/
+│   │   ├── main.py         
+│   │   └── schemas.py      
+│   │
+│   ├── data/
+│   │   ├── load_data.py    
+│   │   └── preprocess.py   
+│   │
+│   ├── modeling/
+│   │   ├── train.py        
+│   │   ├── model_utils.py   
+│   │   └── validation.py    
+│   │
+│   ├── monitoring/
+│   │   ├── drift_report.py  
+│   │   └── metrics.py      
+│   │
+│   ├── retraining/
+│   │   └── retrain.py      
+│   │
+│   └── tests/
+│       ├── test_api.py
+│       ├── test_data.py
+│       ├── test_model.py
+│       └── test_utils.py
+
 ```
 
 
@@ -205,6 +235,7 @@ This screenshot shows:
 ### **Phase 3 – MLOps & Observability**
 - Monitoring dashboard (Prometheus + Grafana)
 - Batch forecasting for all stores
+
 
 
 
