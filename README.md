@@ -53,8 +53,8 @@ A custom train/validation split was used:
 
 - **Training until:** `2015-06-01`  
 - **Validation after:** that date
-- 
-Validation was performed using **TimeSeriesSplit**, MAE and RMSE metrics — executed offline, during the modeling stage.
+  
+Validation was performed using **TimeSeriesSplit**, MAE and RMSE metrics, executed offline, during the modeling stage.
 
 ---
 
@@ -237,6 +237,7 @@ This screenshot shows:
 ### **Phase 3 – MLOps & Observability**
 - Monitoring dashboard (Prometheus + Grafana)
 - Batch forecasting for all stores
+
 
 
 
