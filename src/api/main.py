@@ -48,6 +48,10 @@ def predict(req: PredictRequest):
     # gerar previsão
     forecast = model.predict(future)
 
+    # garantir que forecast é DataFrame
+    if not isinstance(forecast, pd.DataFrame):
+        forecast = pd.DataFrame(forecast)
+
     # apenas os períodos futuros
     future_forecast = forecast.tail(req.periods)
 
