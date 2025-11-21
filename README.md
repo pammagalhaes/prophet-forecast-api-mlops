@@ -195,10 +195,12 @@ The API is deployed at:
 The project includes a GitHub Actions workflow that performs:
 
 - Code checkout and validation
+
+- Automated Tests
   
 - Building the Docker image
   
-- Pushing the image to Docker Hub (if credentials are configured)
+- Pushing the image to Docker Hub
   
 - Automatic deployment to Render using a Deploy Hook
 
@@ -235,6 +237,7 @@ This screenshot shows:
 ### **Phase 3 – MLOps & Observability**
 - Monitoring dashboard (Prometheus + Grafana)
 - Batch forecasting for all stores
+
 
 
 
