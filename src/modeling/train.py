@@ -4,54 +4,76 @@ from ..data.load_data import load_raw
 from ..data.preprocess import basic_clean, to_prophet_df
 from .model_utils import save_model
 from ..config import TRAIN_TEST_SPLIT_DATE, MODEL_DIR
+from src.modeling.validation import validate_prophet
 from prophet import Prophet
+import mlflow
+import mlflow.pyfunc
+from sklearn.metrics import mean_absolute_error
 
 def train_store(df, store_id, split_date=TRAIN_TEST_SPLIT_DATE, regressors=None):
     """
-    Treina um modelo Prophet para uma loja específica.
-    df: DataFrame completo (merged train+store)
-    store_id: int
-    regressors: list of regressors to add to Prophet
-    Retorna: fitted model, forecast (full in-sample + future)
+    Train a Prophet model per store and log metrics and artifacts to MLflow.
     """
-    df_store = df[df['Store'] == store_id].copy()
+    # Filter only this store
+    df_store = df[df["Store"] == store_id].copy()
     if df_store.empty:
         raise ValueError(f"No data for store {store_id}")
+
+    # Basic cleaning -> fill NA, convert types, etc.
     df_store = basic_clean(df_store)
+
+    # Convert to Prophet-ready dataframe
     df_prophet = to_prophet_df(df_store)
 
-    train_df = df_prophet[df_prophet['ds'] < pd.to_datetime(split_date)]
-    if train_df.empty:
-        raise ValueError("Train split resulted in empty dataset; choose earlier split_date.")
+    # Split into train and test using the provided or default split date
+    df_train = df_prophet[df_prophet["ds"] < pd.to_datetime(split_date)]
+    df_test = df_prophet[df_prophet["ds"] >= pd.to_datetime(split_date)]
 
-    m = Prophet(yearly_seasonality=True, weekly_seasonality=True, daily_seasonality=False)
-    regressors = regressors or []
-    for r in regressors:
-        m.add_regressor(r)
+    # Determine regressors if not passed
+    if regressors is None:
+        regressors = [c for c in df_prophet.columns if c not in ["ds", "y"]]
 
-    m.fit(train_df)
+    with mlflow.start_run(run_name=f"store_{store_id}"):
 
-    # prepare future for whole period (train+test) + optionally horizon
-    # to build final future use test.csv or make_future_dataframe as needed in forecasting step
-    # Here we produce in-sample forecast to inspect performance.
-    future = m.make_future_dataframe(periods=0, freq='D')  # in-sample only
-    # merge regressors if present (align by ds)
-    if regressors:
-        regs = df_prophet.set_index('ds')[regressors]
-        future = future.set_index('ds').join(regs, how='left').reset_index().rename(columns={'index': 'ds'})
+        # Initialize Prophet and attach regressors
+        m = Prophet(
+            yearly_seasonality=True,
+            weekly_seasonality=True,
+            daily_seasonality=False
+        )
+        for r in regressors:
+            m.add_regressor(r)
 
-    # forecast
-    forecast = m.predict(future)
+        # Fit only on the training data
+        m.fit(df_train)
 
-    # save model
+        # Forecast on the entire available df_prophet (train + test)
+        future = df_prophet[["ds"] + regressors].copy()
+        forecast = m.predict(future)
+
+        # Compute test metrics only if test exists
+        if len(df_test) > 0:
+            forecast_test = forecast[forecast["ds"] >= pd.to_datetime(split_date)]
+            mae_test = mean_absolute_error(df_test["y"], forecast_test["yhat"])
+            mlflow.log_metric("mae_test", mae_test)
+
+        # Log useful params
+        mlflow.log_param("store_id", store_id)
+        mlflow.log_param("split_date", str(split_date))
+        mlflow.log_param("n_regressors", len(regressors))
+
+        # Log model artifact
+        mlflow.prophet.log_model(m, artifact_path="model")
+
+    # Save model locally
     save_model(m, store_id, MODEL_DIR)
 
     return m, forecast
 
 def train_all_stores(limit=None, regressors=None):
     """
-    Itera por lojas e treina modelos. limit: number of stores (for quick test).
-    Salva modelos em models/.
+    Iterate over stores and train models. limit: number of stores (for quick testing).
+    Saves models in models/.
     """
     df = load_raw()
     store_ids = sorted(df['Store'].unique())
@@ -68,5 +90,4 @@ def train_all_stores(limit=None, regressors=None):
     return results
 
 if __name__ == "__main__":
-    # exemplo rápido: treinar primeiras 10 lojas com regressors
     train_all_stores(limit=10, regressors=["Promo", "StateHoliday", "SchoolHoliday"])
