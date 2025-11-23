@@ -36,7 +36,7 @@ def train_store(df, store_id, split_date=TRAIN_TEST_SPLIT_DATE, regressors=None)
     with mlflow.start_run(run_name=f"store_{store_id}"):
 
         # Initialize Prophet and attach regressors
-        model = Prophet(
+        m = Prophet(
             yearly_seasonality=True,
             weekly_seasonality=True,
             daily_seasonality=False
@@ -45,11 +45,11 @@ def train_store(df, store_id, split_date=TRAIN_TEST_SPLIT_DATE, regressors=None)
             model.add_regressor(r)
 
         # Fit only on the training data
-        model.fit(df_train)
+        m.fit(df_train)
 
         # Forecast on the entire available df_prophet (train + test)
         future = df_prophet[["ds"] + regressors].copy()
-        forecast = model.predict(future)
+        forecast = m.predict(future)
 
         # Compute test metrics only if test exists
         if len(df_test) > 0:
@@ -66,7 +66,7 @@ def train_store(df, store_id, split_date=TRAIN_TEST_SPLIT_DATE, regressors=None)
         mlflow.prophet.log_model(model, artifact_path="model")
 
     # Save model locally
-    save_model(model, store_id, MODEL_DIR)
+    save_model(m, store_id, MODEL_DIR)
 
     return m, forecast
 
