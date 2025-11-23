@@ -12,4 +12,5 @@ streamlit
 httpx
 pytest
 pytest-cov
+mlflow
 
