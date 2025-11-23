@@ -42,7 +42,7 @@ def train_store(df, store_id, split_date=TRAIN_TEST_SPLIT_DATE, regressors=None)
             daily_seasonality=False
         )
         for r in regressors:
-            model.add_regressor(r)
+            m.add_regressor(r)
 
         # Fit only on the training data
         m.fit(df_train)
@@ -63,7 +63,7 @@ def train_store(df, store_id, split_date=TRAIN_TEST_SPLIT_DATE, regressors=None)
         mlflow.log_param("n_regressors", len(regressors))
 
         # Log model artifact
-        mlflow.prophet.log_model(model, artifact_path="model")
+        mlflow.prophet.log_model(m, artifact_path="model")
 
     # Save model locally
     save_model(m, store_id, MODEL_DIR)
