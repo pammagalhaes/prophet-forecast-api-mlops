@@ -66,7 +66,7 @@ def train_store(df, store_id, split_date=TRAIN_TEST_SPLIT_DATE, regressors=None)
         mlflow.prophet.log_model(model, artifact_path="model")
 
     # Save model locally
-    save_model(model, store_id)
+    save_model(model, store_id, model_dir)
 
     return m, forecast
 
