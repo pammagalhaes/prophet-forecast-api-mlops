@@ -14,44 +14,59 @@ def train_store(df, store_id, split_date=TRAIN_TEST_SPLIT_DATE, regressors=None)
     """
     Train a Prophet model per store and log metrics and artifacts to MLflow.
     """
-    df_store = df[df['Store'] == store_id].copy()
+    # Filter only this store
+    df_store = df[df["Store"] == store_id].copy()
+    if df_store.empty:
+        raise ValueError(f"No data for store {store_id}")
+
+    # Basic cleaning -> fill NA, convert types, etc.
     df_store = basic_clean(df_store)
+
+    # Convert to Prophet-ready dataframe
     df_prophet = to_prophet_df(df_store)
 
-    train_df = df_prophet[df_prophet['ds'] < pd.to_datetime(split_date)]
+    # Split into train and test using the provided or default split date
+    df_train = df_prophet[df_prophet["ds"] < pd.to_datetime(split_date)]
+    df_test = df_prophet[df_prophet["ds"] >= pd.to_datetime(split_date)]
+
+    # Determine regressors if not passed
+    if regressors is None:
+        regressors = [c for c in df_prophet.columns if c not in ["ds", "y"]]
 
     with mlflow.start_run(run_name=f"store_{store_id}"):
 
-        # ----- Model -----
-        m = Prophet(yearly_seasonality=True, weekly_seasonality=True, daily_seasonality=False)
-        regressors = regressors or []
+        # Initialize Prophet and attach regressors
+        model = Prophet(
+            yearly_seasonality=True,
+            weekly_seasonality=True,
+            daily_seasonality=False
+        )
         for r in regressors:
-            m.add_regressor(r)
+            model.add_regressor(r)
 
-        m.fit(train_df)
+        # Fit only on the training data
+        model.fit(df_train)
 
-        # ----- Validation (TimeSeriesSplit) -----
-        cv_metrics = validate_prophet(df_prophet, n_splits=3, regressors=regressors)
+        # Forecast on the entire available df_prophet (train + test)
+        future = df_prophet[["ds"] + regressors].copy()
+        forecast = model.predict(future)
 
-        mlflow.log_metric("mae_cv", cv_metrics["mae_mean"])
-        mlflow.log_metric("rmse_cv", cv_metrics["rmse_mean"])
+        # Compute test metrics only if test exists
+        if len(df_test) > 0:
+            forecast_test = forecast[forecast["ds"] >= pd.to_datetime(split_date)]
+            mae_test = mean_absolute_error(df_test["y"], forecast_test["yhat"])
+            mlflow.log_metric("mae_test", mae_test)
 
-        # ----- In-sample forecast -----
-        future = m.make_future_dataframe(periods=0, freq='D')
-        forecast = m.predict(future)
-
-        # Simple in-sample MAE
-        mae_insample = mean_absolute_error(df_prophet['y'], forecast['yhat'])
-        mlflow.log_metric("mae_insample", mae_insample)
-
-        # ----- Parameters -----
+        # Log useful params
         mlflow.log_param("store_id", store_id)
-        mlflow.log_param("regressors", regressors)
+        mlflow.log_param("split_date", str(split_date))
+        mlflow.log_param("n_regressors", len(regressors))
 
-        # ----- Save the model as an artifact -----
-        model_path = f"model_store_{store_id}"
-        m.save(f"{model_path}.joblib")
-        mlflow.log_artifact(f"{model_path}.joblib")
+        # Log model artifact
+        mlflow.prophet.log_model(model, artifact_path="model")
+
+    # Save model locally
+    save_model(model, store_id)
 
     return m, forecast
 
