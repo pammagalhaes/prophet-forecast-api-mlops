@@ -1,9 +1,20 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from ..modeling.model_utils import load_model
 from ..config import MODEL_DIR
 from .schemas import PredictRequest
 import pandas as pd
 from fastapi.middleware.cors import CORSMiddleware
+from src.monitoring.drift_report import (
+    generate_reference_data,
+    generate_current_data,
+    run_drift_report
+)
+
+from src.monitoring.prometheus_exporter import (
+    update_drift_metrics,
+    prometheus_response
+)
+
 
 app = FastAPI(title="Rossmann Prophet Forecast API")
 
@@ -60,3 +71,18 @@ def predict(req: PredictRequest):
         "periods": req.periods,
         "predictions": future_forecast[["ds", "yhat"]].to_dict(orient="records")
     }
+@app.get("/metrics")
+def metrics():
+    data, content_type = prometheus_response()
+    return Response(content=data, media_type=content_type)
+
+
+@app.post("/monitor/drift")
+def monitor_drift():
+    ref_df = generate_reference_data()
+    cur_df = generate_current_data()
+
+    drift = run_drift_report(ref_df, cur_df)
+    update_drift_metrics(drift)
+
+    return drift
