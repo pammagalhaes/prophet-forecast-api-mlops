@@ -61,10 +61,13 @@ def train_store(df, store_id, split_date=TRAIN_TEST_SPLIT_DATE, regressors=None)
         forecast = m.predict(future)
 
         # Compute test metrics only if test exists
-        if len(df_test) > 0:
-            forecast_test = forecast[forecast["ds"] >= pd.to_datetime(split_date)]
+    
+        forecast_test = forecast[forecast["ds"].isin(df_test["ds"])]
+
+        if len(forecast_test) > 0:
             mae_test = mean_absolute_error(df_test["y"], forecast_test["yhat"])
             mlflow.log_metric("mae_test", mae_test)
+
 
         # Log useful params
         mlflow.log_param("store_id", store_id)
