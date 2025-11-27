@@ -1,30 +1,23 @@
 import pandas as pd
-import numpy as np
 from evidently.report import Report
-from evidently.metrics import DataDriftTable
+from evidently.metric_preset import DataDriftPreset
+
+from src.data.load_data import load_raw
+from src.data.preprocess import basic_clean, to_prophet_df
 
 
-def generate_reference_data():
-    return pd.DataFrame({
-        "ds": pd.date_range("2025-01-01", periods=30, freq="D"),
-        "y": 100 + np.random.normal(0, 5, 30)
-    })
+def generate_reference_and_current(cutoff_date="2015-06-01"):
+    df = load_raw()
+    df = basic_clean(df)
+    df = to_prophet_df(df)
+
+    ref = df[df["ds"] < cutoff_date].copy()
+    cur = df[df["ds"] >= cutoff_date].copy()
+
+    return ref, cur
 
 
-def generate_current_data():
-    return pd.DataFrame({
-        "ds": pd.date_range("2025-02-01", periods=30, freq="D"),
-        "y": 110 + np.random.normal(0, 5, 30)  
-    })
-
-
-def run_drift_report(reference_df: pd.DataFrame, current_df: pd.DataFrame):
-    report = Report(metrics=[DataDriftTable()])
-
-    report.run(
-        reference_data=reference_df,
-        current_data=current_df
-    )
-
+def run_drift_report(reference_df, current_df):
+    report = Report(metrics=[DataDriftPreset()])
+    report.run(reference_data=reference_df, current_data=current_df)
     return report.as_dict()
-
