@@ -16,9 +16,10 @@ The final result is a fully functional **forecasting API** capable of predicting
 5. [API](#api)  
 6. [Docker & Deployment](#docker--deployment)  
 7. [GitHub Actions & CI/CD](#github-actions--cicd)  
-8. [Usage](#usage)  
-9. [Screenshots](#screenshots)  
-10. [Future Improvements](#future-improvements)  
+8. [Usage](#usage)
+9. [Monitoring (Grafana & Prometheus)](#monitoring)  
+10. [Screenshots](#screenshots)  
+11. [Future Improvements](#future-improvements)  
 
 ---
 
@@ -204,6 +205,24 @@ The project includes a GitHub Actions workflow that performs:
   
 - Automatic deployment to Render using a Deploy Hook
 
+ ## Monitoring (Grafana & Prometheus)
+
+This version includes an initial MLOps framework with:
+
+- Custom metrics (MAE, RMSE, drift score)
+
+- Export to Prometheus
+
+- Simple dashboard in Grafana
+
+The goal was to initiate the observability cycle and prepare the foundation for:
+
+- continuous monitoring,
+
+- alerts,
+
+- automatic retraining.
+
 # Screenshots
 
 ## 1. Production API Execution — POST /predict
@@ -217,7 +236,9 @@ This screenshot shows a real test of the endpoint in the production environment 
 ## 2. API Response with Forecast Results
  ![descrição](api_render.png)
 
-
+## 3. Grapana
+ ![descrição](grafana.png)
+ 
 This screenshot shows:
 - The full prediction output returned by the Prophet model
 - HTTP status code 200
@@ -230,13 +251,12 @@ This screenshot shows:
 - Add API authentication
 
 ### **Phase 2 – ML Engineering**
-- Automated retraining pipeline
 - Manage models with Git LFS/DVC
 - Add new regressors
 
 ### **Phase 3 – MLOps & Observability**
-- Monitoring dashboard (Prometheus + Grafana)
 - Batch forecasting for all stores
+
 
 
 
