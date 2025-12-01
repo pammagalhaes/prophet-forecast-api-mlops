@@ -47,15 +47,27 @@ def train_store(df, store_id, split_date=TRAIN_TEST_SPLIT_DATE, regressors=None)
         # Fit only on the training data
         m.fit(df_train)
 
-        # Forecast on the entire available df_prophet (train + test)
-        future = df_prophet[["ds"] + regressors].copy()
+        # Futuro de 30 dias
+        future = m.make_future_dataframe(periods=30)
+
+        # Adicionar regressors conhecidos ou constantes
+        for r in regressors:
+            if r in df_prophet.columns:
+                last_value = df_prophet[r].iloc[-1]
+                future[r] = last_value
+            else:
+                future[r] = 0
+
         forecast = m.predict(future)
 
         # Compute test metrics only if test exists
-        if len(df_test) > 0:
-            forecast_test = forecast[forecast["ds"] >= pd.to_datetime(split_date)]
+    
+        forecast_test = forecast[forecast["ds"].isin(df_test["ds"])]
+
+        if len(forecast_test) > 0:
             mae_test = mean_absolute_error(df_test["y"], forecast_test["yhat"])
             mlflow.log_metric("mae_test", mae_test)
+
 
         # Log useful params
         mlflow.log_param("store_id", store_id)
