@@ -13,6 +13,3 @@ prometheus/
 
 # MLflow local artifacts
 mlruns/
-# Model training artifacts
-models/*.pkl
-*.pkl
