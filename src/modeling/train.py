@@ -47,10 +47,10 @@ def train_store(df, store_id, split_date=TRAIN_TEST_SPLIT_DATE, regressors=None)
         # Fit only on the training data
         m.fit(df_train)
 
-        # Futuro de 30 dias
+        # 30-day future horizon
         future = m.make_future_dataframe(periods=30)
 
-        # Adicionar regressors conhecidos ou constantes
+        # Add known regressors or constants
         for r in regressors:
             if r in df_prophet.columns:
                 last_value = df_prophet[r].iloc[-1]

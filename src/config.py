@@ -1,18 +1,18 @@
 from pathlib import Path
 import os
 
-# Caminho base do projeto (raiz)
-BASE_DIR = Path(__file__).resolve().parents[1]  # raiz do projeto (ajustado)
+# Base project path (root)
+BASE_DIR = Path(__file__).resolve().parents[1]  # project root
 
-# Caminhos dos dados
+# Data paths
 DATA_DIR = BASE_DIR / "data" / "raw"
 TRAIN_CSV = DATA_DIR / "train.csv"
 TEST_CSV = DATA_DIR / "test.csv"
 STORE_CSV = DATA_DIR / "store.csv"
 
-# Caminho dos modelos
+# Model path
 if os.getenv("RENDER") == "1":
-    # Deploy no Render
+    # Deploy on Render
     MODEL_DIR = Path("/app/models")
 else:
     # Local

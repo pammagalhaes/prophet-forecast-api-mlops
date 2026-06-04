@@ -47,7 +47,7 @@ def retrain_model(store_id: int, regressors=None, forecast_horizon=30):
             mae_test = mean_absolute_error(df_test["y"], forecast_test["yhat"])
             mlflow.log_metric("mae_test", mae_test)
 
-        # previsao futura
+        # future forecast
         last_date = df_prophet["ds"].max()
         future_dates = pd.date_range(last_date + pd.Timedelta(days=1), periods=forecast_horizon)
 
