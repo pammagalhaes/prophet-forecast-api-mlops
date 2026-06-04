@@ -1,6 +1,3 @@
-from collections import OrderedDict
-import gc
-
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
@@ -25,31 +22,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# loaded models cache with bounded size
-MAX_MODEL_CACHE = 3
-models = OrderedDict()
-
-
-def get_model(store_id: int):
-    if store_id in models:
-        models.move_to_end(store_id)
-        return models[store_id]
-
-    try:
-        model = load_model(store_id, MODEL_DIR)
-    except Exception as e:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Cannot load model for store_id {store_id}: {e}"
-        )
-
-    models[store_id] = model
-    if len(models) > MAX_MODEL_CACHE:
-        _, removed_model = models.popitem(last=False)
-        del removed_model
-        gc.collect()
-
-    return model
+# Maximum periods per prediction request (prevents large forecast spike)
+MAX_PERIODS = 7
 
 
 @app.get("/")
@@ -58,10 +32,22 @@ def root():
 
 @app.post("/predict")
 def predict(req: PredictRequest):
+    if req.periods > MAX_PERIODS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Max periods is {MAX_PERIODS}, got {req.periods}"
+        )
+
     store_id = req.store_id
 
-    # Load model from cache (or disk) with bounded size
-    model = get_model(store_id)
+    # Load model from disk (no cache - minimizes RAM)
+    try:
+        model = load_model(store_id, MODEL_DIR)
+    except Exception as e:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Cannot load model for store_id {store_id}: {e}"
+        )
 
     # Create future dates for prediction
     future = model.make_future_dataframe(periods=req.periods, freq="D")
@@ -76,15 +62,11 @@ def predict(req: PredictRequest):
     if not isinstance(forecast, pd.DataFrame):
         forecast = pd.DataFrame(forecast)
 
-    future_forecast = forecast.tail(req.periods)[["ds", "yhat"]]
-
-    # Free temporary memory before drift and return
-    del forecast
-    del future
-    gc.collect()
+    future_forecast = forecast.tail(req.periods)[["ds", "yhat"]].copy()
+    future_forecast["yhat"] = future_forecast["yhat"].round(2)
 
     # ───────────────────────────────────────────────
-    # 1. Check DRIFT
+    # 1. Check DRIFT (lightweight cache prevents overload)
     # ───────────────────────────────────────────────
     share_drifted, drift_detected, report = check_drift()
 
@@ -127,12 +109,6 @@ def retrain_endpoint(store_id: int):
         result = retrain_model(store_id=store_id)
         if not isinstance(result, dict) or "model" not in result:
             raise ValueError("retrain_model did not return a dict containing the key 'model'")
-        models[store_id] = result["model"]
-        models.move_to_end(store_id)
-        if len(models) > MAX_MODEL_CACHE:
-            _, removed_model = models.popitem(last=False)
-            del removed_model
-            gc.collect()
         return {
             "status": "success",
             "store_id": store_id,
