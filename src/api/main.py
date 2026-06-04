@@ -5,7 +5,6 @@ import pandas as pd
 from src.modeling.model_utils import load_model
 from src.config import MODEL_DIR
 from src.api.schemas import PredictRequest
-from src.retraining.retrain import retrain_model
 
 from src.monitoring.drift_detector import check_drift
 from src.monitoring.prometheus_exporter import (
@@ -22,7 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# cache de modelos carregados
+# loaded models cache
 models = {}
 
 @app.get("/")
@@ -33,7 +32,7 @@ def root():
 def predict(req: PredictRequest):
     store_id = req.store_id
 
-    # Carrega modelo do cache (ou disco)
+    # Load model from cache (or disk)
     if store_id not in models:
         try:
             models[store_id] = load_model(store_id, MODEL_DIR)
@@ -45,10 +44,10 @@ def predict(req: PredictRequest):
 
     model = models[store_id]
 
-    # Criar datas futuras para previsão
+    # Create future dates for prediction
     future = model.make_future_dataframe(periods=req.periods, freq="D")
 
-    # Regressors constantes
+    # Constant regressors
     future["Promo"] = req.promo
     future["StateHoliday"] = req.stateholiday
     future["SchoolHoliday"] = req.schoolholiday
@@ -61,22 +60,17 @@ def predict(req: PredictRequest):
     future_forecast = forecast.tail(req.periods)[["ds", "yhat"]]
 
     # ───────────────────────────────────────────────
-    # 1. Verificar DRIFT
+    # 1. Check DRIFT
     # ───────────────────────────────────────────────
     share_drifted, drift_detected, report = check_drift()
 
-    # Salva métricas para Prometheus
+    # Save metrics for Prometheus
     update_drift_metrics(drift_detected)
 
     # ───────────────────────────────────────────────
-    # 2. Se drift for grave → retreinar automaticamente
+    # 2. Do not retrain inside the /predict endpoint
     # ───────────────────────────────────────────────
     retrain_info = None
-    if drift_detected:
-        retrain_info = retrain_model(store_id=store_id)
-
-        # Atualiza o modelo em cache
-        models[store_id] = retrain_info["model"]
 
     return {
         "store_id": store_id,
@@ -86,7 +80,7 @@ def predict(req: PredictRequest):
             "share_drifted": share_drifted,
             "drift_detected": drift_detected,
         },
-        "retrained": retrain_info is not None
+        "retrained": False
     }
 
 
