@@ -1,3 +1,6 @@
+from collections import OrderedDict
+import gc
+
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
@@ -5,6 +8,7 @@ import pandas as pd
 from src.modeling.model_utils import load_model
 from src.config import MODEL_DIR
 from src.api.schemas import PredictRequest
+from src.retraining.retrain import retrain_model
 
 from src.monitoring.drift_detector import check_drift
 from src.monitoring.prometheus_exporter import (
@@ -21,8 +25,32 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# loaded models cache
-models = {}
+# loaded models cache with bounded size
+MAX_MODEL_CACHE = 3
+models = OrderedDict()
+
+
+def get_model(store_id: int):
+    if store_id in models:
+        models.move_to_end(store_id)
+        return models[store_id]
+
+    try:
+        model = load_model(store_id, MODEL_DIR)
+    except Exception as e:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Cannot load model for store_id {store_id}: {e}"
+        )
+
+    models[store_id] = model
+    if len(models) > MAX_MODEL_CACHE:
+        _, removed_model = models.popitem(last=False)
+        del removed_model
+        gc.collect()
+
+    return model
+
 
 @app.get("/")
 def root():
@@ -32,17 +60,8 @@ def root():
 def predict(req: PredictRequest):
     store_id = req.store_id
 
-    # Load model from cache (or disk)
-    if store_id not in models:
-        try:
-            models[store_id] = load_model(store_id, MODEL_DIR)
-        except Exception as e:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Não foi possível carregar o modelo do store_id {store_id}: {str(e)}"
-            )
-
-    model = models[store_id]
+    # Load model from cache (or disk) with bounded size
+    model = get_model(store_id)
 
     # Create future dates for prediction
     future = model.make_future_dataframe(periods=req.periods, freq="D")
@@ -59,6 +78,11 @@ def predict(req: PredictRequest):
 
     future_forecast = forecast.tail(req.periods)[["ds", "yhat"]]
 
+    # Free temporary memory before drift and return
+    del forecast
+    del future
+    gc.collect()
+
     # ───────────────────────────────────────────────
     # 1. Check DRIFT
     # ───────────────────────────────────────────────
@@ -70,7 +94,6 @@ def predict(req: PredictRequest):
     # ───────────────────────────────────────────────
     # 2. Do not retrain inside the /predict endpoint
     # ───────────────────────────────────────────────
-    retrain_info = None
 
     return {
         "store_id": store_id,
@@ -105,6 +128,11 @@ def retrain_endpoint(store_id: int):
         if not isinstance(result, dict) or "model" not in result:
             raise ValueError("retrain_model did not return a dict containing the key 'model'")
         models[store_id] = result["model"]
+        models.move_to_end(store_id)
+        if len(models) > MAX_MODEL_CACHE:
+            _, removed_model = models.popitem(last=False)
+            del removed_model
+            gc.collect()
         return {
             "status": "success",
             "store_id": store_id,
