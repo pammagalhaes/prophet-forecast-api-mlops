@@ -21,7 +21,14 @@ def validate_prophet(df_prophet, n_splits=3, regressors=None):
         train_df = df_prophet.iloc[train_idx]
         test_df = df_prophet.iloc[test_idx]
 
-        m = Prophet(yearly_seasonality=True, weekly_seasonality=True, daily_seasonality=False)
+        # Minimal Prophet configuration for validation
+        m = Prophet(
+            yearly_seasonality=False,
+            weekly_seasonality=True,
+            daily_seasonality=False,
+            changepoint_prior_scale=0.05,
+            interval_width=0.8
+        )
 
         for r in regressors:
             m.add_regressor(r)

@@ -2,7 +2,8 @@ import time
 
 from src.monitoring.drift_report import generate_reference_and_current, run_drift_report
 
-DRIFT_CACHE_TTL_SECONDS = 30
+# Cache drift results for 10 minutes to avoid repeated dataset processing
+DRIFT_CACHE_TTL_SECONDS = 600
 _cached_drift_result = None
 _cached_drift_timestamp = 0.0
 

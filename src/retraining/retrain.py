@@ -28,10 +28,13 @@ def retrain_model(store_id: int, regressors=None, forecast_horizon=30):
 
     with mlflow.start_run(run_name=f"retrain_store_{store_id}") as active_run:
 
+        # Initialize Prophet with minimal complexity for free tier stability
         m = Prophet(
-            yearly_seasonality=True,
+            yearly_seasonality=False,
             weekly_seasonality=True,
-            daily_seasonality=False
+            daily_seasonality=False,
+            changepoint_prior_scale=0.05,
+            interval_width=0.8
         )
 
         for r in regressors:

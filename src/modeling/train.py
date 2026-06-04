@@ -35,11 +35,13 @@ def train_store(df, store_id, split_date=TRAIN_TEST_SPLIT_DATE, regressors=None)
 
     with mlflow.start_run(run_name=f"store_{store_id}"):
 
-        # Initialize Prophet and attach regressors
+        # Initialize Prophet with minimal complexity for free tier stability
         m = Prophet(
-            yearly_seasonality=True,
+            yearly_seasonality=False,
             weekly_seasonality=True,
-            daily_seasonality=False
+            daily_seasonality=False,
+            changepoint_prior_scale=0.05,
+            interval_width=0.8
         )
         for r in regressors:
             m.add_regressor(r)
