@@ -223,7 +223,7 @@ The goal was to initiate the observability cycle and prepare the foundation for:
 
 - automatic retraining.
 
-- ## Kubernetes (Minikube)
+## Kubernetes (Minikube)
 
 The API can also run on a local Kubernetes cluster with Minikube.
 
@@ -231,11 +231,11 @@ The API can also run on a local Kubernetes cluster with Minikube.
 minikube start --driver=docker
 docker build -t rossmann-api:local .
 minikube image load rossmann-api:local
-kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s.yaml
 minikube service rossmann-api
 ```
 
-The manifest (`k8s/deployment.yaml`) defines:
+The manifest (`k8s.yaml`) defines:
 
 - **Deployment:** runs the API container with readiness/liveness probes on `GET /` and CPU/memory requests and limits.
 - **Service (NodePort):** exposes the API and load-balances requests across the Pods.
