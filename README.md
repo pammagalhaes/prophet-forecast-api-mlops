@@ -223,6 +223,34 @@ The goal was to initiate the observability cycle and prepare the foundation for:
 
 - automatic retraining.
 
+- ## Kubernetes (Minikube)
+
+The API can also run on a local Kubernetes cluster with Minikube.
+
+```bash
+minikube start --driver=docker
+docker build -t rossmann-api:local .
+minikube image load rossmann-api:local
+kubectl apply -f k8s/deployment.yaml
+minikube service rossmann-api
+```
+
+The manifest (`k8s/deployment.yaml`) defines:
+
+- **Deployment:** runs the API container with readiness/liveness probes on `GET /` and CPU/memory requests and limits.
+- **Service (NodePort):** exposes the API and load-balances requests across the Pods.
+
+Useful commands:
+
+```bash
+kubectl get pods                                      # check Pod status
+kubectl scale deployment rossmann-api --replicas=2    # scale up
+kubectl rollout restart deployment rossmann-api       # rolling update
+kubectl logs <pod-name>                               # view logs
+```
+
+> The image is built and loaded locally (`imagePullPolicy: Never`), so no registry is needed.
+
 # Screenshots
 
 ## 1. Production API Execution — POST /predict
