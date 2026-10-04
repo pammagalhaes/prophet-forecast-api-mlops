@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rossmann-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rossmann-api
+  template:
+    metadata:
+      labels:
+        app: rossmann-api
+    spec:
+      containers:
+        - name: api
+         # Imagem local for Minikube:
+          # docker build -t rossmann-api:local . && minikube image load rossmann-api:local
+          image: rossmann-api:local
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8000
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 20
+            timeoutSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rossmann-api
+spec:
+  selector:
+    app: rossmann-api
+  ports:
+    - port: 80
+      targetPort: 8000
+  type: NodePort
